@@ -1,0 +1,35 @@
+version: '3.5'
+services:
+  rdfizer:
+    image: bigoli98/rdfizer:latest
+    networks:
+      setup:
+        ipv4_address: 172.30.0.2
+  stardog:
+    image: stardog/stardog:latest
+    ports:
+      - "$STARDOG_PORT:5820"
+    volumes:
+      - ./stardog_config/:/var/opt/stardog/
+    networks:
+      setup:
+        ipv4_address: 172.30.0.3
+  db_expander:
+    image: bigoli98/sparql-analyser-api:latest
+    environment:
+      useDocker: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - sparql-analyse:/app/analysis
+    networks:
+      setup:
+        ipv4_address: 172.30.0.4
+volumes:
+  sparql-analyse:
+    external: true
+networks:
+  setup:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1

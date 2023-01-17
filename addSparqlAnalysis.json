@@ -1,0 +1,10 @@
+{
+  "type": 0,
+  "selectQuery": "PREFIX qado: <urn:qado#> SELECT ?question ?query ?text { ?question qado:isElementOf ?benchmark ; qado:hasSparqlQuery ?query . ?query qado:hasQueryText ?text . }",
+  "username": "admin",
+  "password": "admin",
+  "databaseName": "DBNAME",
+  "databaseUri": "http://172.30.0.1",
+  "databasePort": -1,
+  "upload": true
+}
