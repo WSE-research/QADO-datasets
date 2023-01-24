@@ -7,6 +7,7 @@ You need to provide a valid Stardog license key in the `stardog_config` director
 
 Edit the environment variables in `config.sh` to adjust the setup for your needs.
 You can change the following properties:
+* `ADMIN_PWD`: The password for the `admin` user. It's recommended to change it.
 * `STARDOG_PORT`: The external port at which the stardog instance is available after 
 the configuration has been finished.
 * `STARDOG_DB_NAME`: The name of the database where the QADO dataset will be stored.

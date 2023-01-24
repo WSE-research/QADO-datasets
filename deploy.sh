@@ -23,6 +23,7 @@ function checkAvailability() {
 
 
 function fetchRmlData() {
+  echo "Converting JSON to RDF..."
   for payload in $(find datasets/ -iname "*.json")
   do
     curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$payload.ttl" http://172.30.0.2:8080/json2rdf
@@ -40,6 +41,8 @@ function addDataToDb() {
 
 
 function addAdditionalProperties() {
+  echo "Generating additional properties..."
+
   payload=$(cat addSparqlAnalysis.json)
   payload=${payload/DBNAME/"$STARDOG_DB_NAME"}
   id=$(curl --silent -X POST -H "Content-Type: application/json" --data-raw "${payload/"-1"/"$STARDOG_PORT"}" http://172.30.0.4:80/sparql/analyse/db | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
@@ -79,9 +82,7 @@ function createDb() {
 function insertDataIntoDb() {
   if [ "$1" -eq 201 ]
   then
-    echo "Converting JSON to RDF..."
     fetchRmlData
-    echo "Generating additional properties..."
     addAdditionalProperties
   else
     echo "Failed to create db $STARDOG_DB_NAME! Stopping deployment..."
@@ -102,8 +103,14 @@ function startFinalStardog() {
   docker run --name "QADO-stardog" -p "$STARDOG_PORT:5820" -itd -v "$(pwd)/stardog_config:/var/opt/stardog" stardog/stardog:latest
 }
 
+function configurePermissions() {
+  sleep 10
+  curl -X PUT -H "Content-Type: application/json" http://admin:admin@localhost:5820/admin/users/admin/pwd --data-raw "{\"password\": \"$ADMIN_PWD\"}"
+}
+
 
 startDeployer
 createDb
 stopDeployer
 startFinalStardog
+configurePermissions
