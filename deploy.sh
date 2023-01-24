@@ -5,6 +5,18 @@ function initSparqlExpansion() {
   docker pull bigoli98/sparql-analyser:latest > /dev/null
   docker tag bigoli98/sparql-analyser:latest sparql-analyser:latest > /dev/null
   docker image rm bigoli98/sparql-analyser:latest > /dev/null
+
+  initializeStardogConfig
+}
+
+
+function initializeStardogConfig() {
+  docker volume create qado-stardog > /dev/null
+
+  docker run --rm -d --name dummy -v qado-stardog:/stardog alpine tail -f /dev/null > /dev/null
+  docker cp stardog_config/* dummy:/stardog/
+  docker exec dummy chown -R 1000:1000 stardog/
+  docker stop dummy > /dev/null
 }
 
 
@@ -100,10 +112,12 @@ function stopDeployer() {
 
 function startFinalStardog() {
   echo "Start final Stardog instance on port $STARDOG_PORT..."
-  docker run --name "QADO-stardog" -p "$STARDOG_PORT:5820" -itd -v "$(pwd)/stardog_config:/var/opt/stardog" stardog/stardog:latest
+  docker run --name "QADO-stardog" --restart unless-stopped -p "$STARDOG_PORT:5820" -itd -v "qado-stardog:/var/opt/stardog" "stardog/stardog:$STARDOG_VERSION" > /dev/null
 }
 
+
 function configurePermissions() {
+  echo "Updating permissions..."
   sleep 10
   curl -X PUT -H "Content-Type: application/json" http://admin:admin@localhost:5820/admin/users/admin/pwd --data-raw "{\"password\": \"$ADMIN_PWD\"}"
 }

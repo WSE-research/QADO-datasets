@@ -6,11 +6,11 @@ services:
       setup:
         ipv4_address: 172.30.0.2
   stardog:
-    image: stardog/stardog:latest
+    image: stardog/stardog:$STARDOG_VERSION
     ports:
       - "$STARDOG_PORT:5820"
     volumes:
-      - ./stardog_config/:/var/opt/stardog/
+      - qado-stardog:/var/opt/stardog/
     networks:
       setup:
         ipv4_address: 172.30.0.3
@@ -26,6 +26,8 @@ services:
         ipv4_address: 172.30.0.4
 volumes:
   sparql-analyse:
+    external: true
+  qado-stardog:
     external: true
 networks:
   setup:

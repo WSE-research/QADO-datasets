@@ -8,6 +8,8 @@ You need to provide a valid Stardog license key in the `stardog_config` director
 Edit the environment variables in `config.sh` to adjust the setup for your needs.
 You can change the following properties:
 * `ADMIN_PWD`: The password for the `admin` user. It's recommended to change it.
+* `STARDOG_VERSION`: The stardog version you want to use. It has to be compatible with
+your license. You need to select a valid [Stardog Docker Image tag](https://hub.docker.com/r/stardog/stardog/tags).
 * `STARDOG_PORT`: The external port at which the stardog instance is available after 
 the configuration has been finished.
 * `STARDOG_DB_NAME`: The name of the database where the QADO dataset will be stored.
