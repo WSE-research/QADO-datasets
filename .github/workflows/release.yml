@@ -1,0 +1,19 @@
+name: Release QADO version
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Store license key
+        run: echo -n "${{ secrets.LICENSE_KEY }}" | base64 --decode > stardog_config/stardog-license-key.bin
+      - name: Create QADO dataset
+        run: ./config.sh
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: qado.zip

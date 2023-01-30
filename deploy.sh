@@ -112,14 +112,22 @@ function stopDeployer() {
 
 function startFinalStardog() {
   echo "Start final Stardog instance on port $STARDOG_PORT..."
-  docker run --name "QADO-stardog" --restart unless-stopped -p "$STARDOG_PORT:5820" -itd -v "qado-stardog:/var/opt/stardog" "stardog/stardog:$STARDOG_VERSION" > /dev/null
+  docker run --rm --name "QADO-stardog" -p "$STARDOG_PORT:5820" -itd -v "qado-stardog:/var/opt/stardog" "stardog/stardog:$STARDOG_VERSION" > /dev/null
 }
 
 
-function configurePermissions() {
-  echo "Updating permissions..."
+function exportDb() {
+  echo "Export DB..."
   sleep 10
-  curl -X PUT -H "Content-Type: application/json" http://admin:admin@localhost:5820/admin/users/admin/pwd --data-raw "{\"password\": \"$ADMIN_PWD\"}"
+  curl "http://admin:admin@localhost:$STARDOG_PORT/$STARDOG_DB_NAME/export" --silent -o "qado.ttl"
+  zip qado.zip qado.ttl
+  rm qado.ttl
+  stopStardog
+}
+
+function stopStardog() {
+  docker container stop QADO-stardog > /dev/null
+  docker volume rm qado-stardog > /dev/null
 }
 
 
@@ -127,4 +135,4 @@ startDeployer
 createDb
 stopDeployer
 startFinalStardog
-configurePermissions
+exportDb
