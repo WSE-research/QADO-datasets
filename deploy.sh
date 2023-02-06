@@ -121,7 +121,6 @@ function exportDb() {
   sleep 10
   curl "http://admin:admin@localhost:$STARDOG_PORT/$STARDOG_DB_NAME/export" --silent -o "qado.ttl"
   zip qado.zip qado.ttl
-  rm qado.ttl
   stopStardog
 }
 
