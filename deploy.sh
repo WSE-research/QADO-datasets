@@ -122,7 +122,6 @@ function exportDb() {
   echo "Export DB..."
   sleep 10
   curl "http://admin:admin@localhost:$STARDOG_PORT/$STARDOG_DB_NAME/export" --silent -o "qado.ttl"
-  zip qado-full-dataset.zip qado.ttl
   zip qado-benchmarks.zip datasets/*.ttl ontology.ttl
   stopStardog
 }
