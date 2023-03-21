@@ -1,0 +1,7 @@
+{
+    "filePath": "https://raw.githubusercontent.com/coastalcph/seq2sparql/master/mcwq/official/random_split/test.he.txt",
+    "format": "compositional_wikidata",
+    "language": "he",
+    "label": "Compositional Wikidata Questions test",
+    "homepage": "https://github.com/coastalcph/seq2sparql"
+}

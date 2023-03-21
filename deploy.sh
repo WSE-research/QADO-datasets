@@ -14,8 +14,8 @@ function initializeStardogConfig() {
   docker volume create qado-stardog > /dev/null
 
   docker run --rm -d --name dummy -v qado-stardog:/stardog alpine tail -f /dev/null > /dev/null
-  docker cp stardog_config/* dummy:/stardog/
-  docker exec dummy chown -R 1000:1000 stardog/
+  docker cp stardog_config/* dummy:/stardog/ > /dev/null
+  docker exec dummy chown -R 1000:1000 stardog/ > /dev/null
   docker stop dummy > /dev/null
 }
 
@@ -33,21 +33,27 @@ function checkAvailability() {
   done
 }
 
+function loadOntology() {
+  echo "Fetching ontology..."
+  curl --silent --output ontology.ttl http://172.30.0.2:8080/ontology
+  addDataToDb "ontology.ttl"
+}
+
 
 function fetchRmlData() {
   echo "Converting JSON to RDF..."
   for payload in $(find datasets/ -iname "*.json")
   do
-    curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$payload.ttl" http://172.30.0.2:8080/json2rdf
-    addDataToDb "$payload"
-    rm "$payload.ttl"
+    data_file="${payload/".json"/".ttl"}"
+    curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$data_file" http://172.30.0.2:8080/json2rdf
+    addDataToDb "$data_file"
   done
 }
 
 
 function addDataToDb() {
    tx=$(curl -u admin:admin --silent -X POST "http://172.30.0.3:5820/$STARDOG_DB_NAME/transaction/begin")
-   curl -u admin:admin --silent --output /dev/null -X POST -H "Content-Type: text/turtle" --data-binary "@$1.ttl" "http://172.30.0.3:5820/$STARDOG_DB_NAME/${tx}/add?graph-uri=default"
+   curl -u admin:admin --silent --output /dev/null -X POST -H "Content-Type: text/turtle" --data-binary "@$1" "http://172.30.0.3:5820/$STARDOG_DB_NAME/${tx}/add?graph-uri=default"
    curl -u admin:admin --silent --output /dev/null -X POST "http://172.30.0.3:5820/$STARDOG_DB_NAME/transaction/commit/$tx"
 }
 
@@ -85,20 +91,16 @@ function startDeployer() {
 
 function createDb() {
   echo "Creating db $STARDOG_DB_NAME..."
-  DB_CREATION=$(curl --write-out '%{http_code}' --silent --output /dev/null -u admin:admin -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases)
+  curl --silent --output /dev/null -u admin:admin -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases
 
-  insertDataIntoDb "$DB_CREATION"
+  insertDataIntoDb
 }
 
 
 function insertDataIntoDb() {
-  if [ "$1" -eq 201 ]
-  then
-    fetchRmlData
-    addAdditionalProperties
-  else
-    echo "Failed to create db $STARDOG_DB_NAME! Stopping deployment..."
-  fi
+  loadOntology
+  fetchRmlData
+  addAdditionalProperties
 }
 
 
@@ -120,13 +122,17 @@ function exportDb() {
   echo "Export DB..."
   sleep 10
   curl "http://admin:admin@localhost:$STARDOG_PORT/$STARDOG_DB_NAME/export" --silent -o "qado.ttl"
-  zip qado.zip qado.ttl
+  zip qado-full-dataset.zip qado.ttl
+  zip qado-benchmarks.zip datasets/*.ttl ontology.ttl
   stopStardog
 }
 
 function stopStardog() {
   docker container stop QADO-stardog > /dev/null
+  sleep 3
   docker volume rm qado-stardog > /dev/null
+  rm -rf *.ttl
+  rm -rf datasets/*.ttl
 }
 
 
