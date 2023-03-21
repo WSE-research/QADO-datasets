@@ -18,7 +18,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: qado.zip
+          files: |
+            qado-full-dataset.zip
+            qado-benchmarks.zip
           token: ${{ secrets.TOKEN }}
       - name: Deploy QADO dataset
         if: startsWith(github.ref, 'refs/tags/')

@@ -24,9 +24,9 @@ function checkAvailability() {
   while true
   do
     sleep 5
-    code=$(curl --write-out '%{http_code}' --silent --output /dev/null http://172.30.0.2:8080/json2rdf)
+    code=$(curl -u admin:admin --write-out '%{http_code}' --silent --output /dev/null http://172.30.0.3:5820)
 
-    if [ "$code" -eq 200 ]
+    if [ "$code" -eq 302 ]
     then
       break
     fi
@@ -91,7 +91,7 @@ function startDeployer() {
 
 function createDb() {
   echo "Creating db $STARDOG_DB_NAME..."
-  curl -u admin:admin -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases
+  curl -u admin:admin --silent --output /dev/null -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases
 
   insertDataIntoDb
 }
@@ -131,7 +131,6 @@ function stopStardog() {
   docker container stop QADO-stardog > /dev/null
   sleep 3
   docker volume rm qado-stardog > /dev/null
-  rm -rf *.ttl
   rm -rf datasets/*.ttl
 }
 
