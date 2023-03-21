@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       EXPORT_DB: "${{ secrets.EXPORT_DB }}"
     steps:
