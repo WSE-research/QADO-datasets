@@ -91,7 +91,7 @@ function startDeployer() {
 
 function createDb() {
   echo "Creating db $STARDOG_DB_NAME..."
-  curl --silent --output /dev/null -u admin:admin -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases
+  curl -u admin:admin -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases
 
   insertDataIntoDb
 }
