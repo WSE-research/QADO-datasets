@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Store license key
-        run: echo -n "${{ secrets.LICENSE_KEY }}" | base64 --decode > stardog_config/stardog-license-key.bin
       - name: Create QADO dataset
         run: ./config.sh
       - name: Release
