@@ -8,17 +8,15 @@ services:
     networks:
       setup:
         ipv4_address: 172.30.0.2
-  stardog:
-    image: stardog/stardog:$STARDOG_VERSION
+  graphdb:
+    image: ontotext/graphdb:10.2.0
     ports:
-      - "$STARDOG_PORT:5820"
-    volumes:
-      - qado-stardog:/var/opt/stardog/
+      - "7200:7200"
     networks:
       setup:
         ipv4_address: 172.30.0.3
   db_expander:
-    image: bigoli98/sparql-analyser-api:latest
+    image: wseresearch/sparql-analyser-api:latest
     environment:
       useDocker: 1
     volumes:
@@ -39,8 +37,6 @@ services:
         ipv4_address: 172.30.0.11
 volumes:
   sparql-analyse:
-    external: true
-  qado-stardog:
     external: true
 networks:
   setup:

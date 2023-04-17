@@ -2,21 +2,9 @@
 function initSparqlExpansion() {
   echo "Initialize setup..."
   docker volume create sparql-analyse > /dev/null
-  docker pull bigoli98/sparql-analyser:latest > /dev/null
-  docker tag bigoli98/sparql-analyser:latest sparql-analyser:latest > /dev/null
-  docker image rm bigoli98/sparql-analyser:latest > /dev/null
-
-  initializeStardogConfig
-}
-
-
-function initializeStardogConfig() {
-  docker volume create qado-stardog > /dev/null
-
-  docker run --rm -d --name dummy -v qado-stardog:/stardog alpine tail -f /dev/null > /dev/null
-  docker cp stardog_config/* dummy:/stardog/ > /dev/null
-  docker exec dummy chown -R 1000:1000 stardog/ > /dev/null
-  docker stop dummy > /dev/null
+  docker pull wseresearch/sparql-analyser:latest > /dev/null
+  docker tag wseresearch/sparql-analyser:latest sparql-analyser:latest > /dev/null
+  docker image rm wseresearch/sparql-analyser:latest > /dev/null
 }
 
 
@@ -24,9 +12,9 @@ function checkAvailability() {
   while true
   do
     sleep 5
-    code=$(curl -u admin:admin --write-out '%{http_code}' --silent --output /dev/null http://172.30.0.3:5820)
+    code=$(curl http://localhost:7200/rest/repositories -H "Accept: application/json" --write-out '%{http_code}' --silent --output /dev/null)
 
-    if [ "$code" -eq 302 ]
+    if [ "$code" -eq 200 ]
     then
       break
     fi
@@ -52,9 +40,7 @@ function fetchRmlData() {
 
 
 function addDataToDb() {
-   tx=$(curl -u admin:admin --silent -X POST "http://172.30.0.3:5820/$STARDOG_DB_NAME/transaction/begin")
-   curl -u admin:admin --silent --output /dev/null -X POST -H "Content-Type: text/turtle" --data-binary "@$1" "http://172.30.0.3:5820/$STARDOG_DB_NAME/${tx}/add?graph-uri=default"
-   curl -u admin:admin --silent --output /dev/null -X POST "http://172.30.0.3:5820/$STARDOG_DB_NAME/transaction/commit/$tx"
+   curl --silent -X POST -H "Content-Type: application/x-turtle" -T "$1" "http://172.30.0.3:7200/repositories/qado/statements"
 }
 
 
@@ -90,8 +76,8 @@ function startDeployer() {
 
 
 function createDb() {
-  echo "Creating db $STARDOG_DB_NAME..."
-  curl -u admin:admin --silent --output /dev/null -X POST -F root="{\"dbname\": \"$STARDOG_DB_NAME\"}" http://172.30.0.3:5820/admin/databases
+  echo "Creating db qado..."
+  curl --silent --output /dev/null -X POST -H "Content-Type: multipart/form-data" -F "config=@repo-config.ttl" http://172.30.0.3:7200/rest/repositories
 
   insertDataIntoDb
 }
@@ -112,30 +98,19 @@ function stopDeployer() {
 }
 
 
-function startFinalStardog() {
-  echo "Start final Stardog instance on port $STARDOG_PORT..."
-  docker run --rm --name "QADO-stardog" -p "$STARDOG_PORT:5820" -itd -v "qado-stardog:/var/opt/stardog" "stardog/stardog:$STARDOG_VERSION" > /dev/null
-}
-
-
 function exportDb() {
   echo "Export DB..."
-  sleep 10
-  curl "http://admin:admin@localhost:$STARDOG_PORT/$STARDOG_DB_NAME/export" --silent -o "qado.ttl"
-  zip qado-benchmarks.zip datasets/*.ttl ontology.ttl
-  stopStardog
+  curl -H "Accept: application/x-turtle" --silent -o "full-qado.ttl" http://localhost:7200/repositories/qado/statements?infer=false
+  zip qado-benchmarks.zip datasets/*.ttl ontology.ttl full-qado.ttl
+  removeTTL
 }
 
-function stopStardog() {
-  docker container stop QADO-stardog > /dev/null
-  sleep 3
-  docker volume rm qado-stardog > /dev/null
+function removeTTL() {
   rm -rf datasets/*.ttl
 }
 
 
 startDeployer
 createDb
-stopDeployer
-startFinalStardog
 exportDb
+stopDeployer
