@@ -48,8 +48,7 @@ function addAdditionalProperties() {
   echo "Generating additional properties..."
 
   payload=$(cat addSparqlAnalysis.json)
-  payload=${payload/DBNAME/"$STARDOG_DB_NAME"}
-  id=$(curl --silent -X POST -H "Content-Type: application/json" --data-raw "${payload/"-1"/"$STARDOG_PORT"}" http://172.30.0.4:80/sparql/analyse/db | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
+  id=$(curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.30.0.4:80/sparql/analyse/db | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
   sleep 5
   initial=$(curl --silent "http://172.30.0.4:80/sparql/analyse/$id")
 
