@@ -1,6 +1,38 @@
 # QADO dataset deployer
 This repository contains a setup script to install a stardog instance via Docker
-with the QADO dataset.
+with the QADO dataset. Therefor, the following services are used:
+* [QADO Question Answering RDFizer](https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer)
+* [QADO SPARQL Query Analyser](https://github.com/WSE-research/SPARQLQueryAnalyser)
+* [GraphDB](https://www.ontotext.com/products/graphdb/)
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant RDFizer
+    participant SPARQLQueryAnalyser
+    participant SPARQLProcessor
+    
+    Host ->> RDFizer: Convert JSON to RDF
+    RDFizer -->> Host: Response with RDF triples
+    Host ->> GraphDB: Store triples to DB
+    GraphDB -->> Host: Storing finished
+    Host -) SPARQLQueryAnalyser: Request SPARQL query statistics generation
+    SPARQLQueryAnalyser ->> GraphDB: Fetch SPARQL queries
+    GraphDB -->> SPARQLQueryAnalyser: Response with all SPARQL queries
+    SPARQLQueryAnalyser ->> SPARQLProcessor: Process SPARQL queries
+    SPARQLProcessor ->> GraphDB: Upload additional properties
+    GraphDB -->> SPARQLProcessor: Upload finished
+    SPARQLProcessor -->> SPARQLQueryAnalyser: Processing finished
+    SPARQLQueryAnalyser --) Host: SPARQL query statistics generation finished
+    Host ->> GraphDB: Export full dataset
+    GraphDB -->> Host: QADO dataset as RDF triples
+```
+
+## Configure benchmarks
+Inside the `datasets` directory all tested benchmarks, that can be
+integrated into the QADO dataset, are provided. If you want to add
+additional benchmarks, provided a valid [RDFizer payload](https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer#api-endpoint)
+as a new JSON file.
 
 ## Run deployer
 1. Clone the repository
