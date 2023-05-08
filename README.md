@@ -1,9 +1,9 @@
 # QADO dataset deployer
 This repository contains a setup script to install a stardog instance via Docker
 with the QADO dataset. Therefor, the following services are used:
-* [QADO Question Answering RDFizer](https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer)
-* [QADO SPARQL Query Analyser](https://github.com/WSE-research/SPARQLQueryAnalyser)
-* [GraphDB](https://www.ontotext.com/products/graphdb/)
+* [QADO Question Answering RDFizer](https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer) (basic JSON benchmark to RDF mapping)
+* [QADO SPARQL Query Analyser](https://github.com/WSE-research/SPARQLQueryAnalyser) (extending SPARQL query objects with statistics)
+* [GraphDB](https://www.ontotext.com/products/graphdb/) (temporarly required for storing QADO data, accessible during build process at http://localhost:7200)
 
 ```mermaid
 sequenceDiagram
