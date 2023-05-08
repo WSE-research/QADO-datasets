@@ -67,6 +67,7 @@ function addAdditionalProperties() {
 
 function startDeployer() {
   initSparqlExpansion
+  docker-compose pull
   docker-compose up -d
 
   echo "Waiting until start up finished..."
