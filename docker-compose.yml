@@ -3,18 +3,18 @@ services:
   rdfizer:
     image: wseresearch/qado-rdfizer:latest
     environment:
-      - RML_APPLICATOR_HOST=http://172.30.0.10:8080
-      - DATASET_PREPROCESSOR_HOST=http://172.30.0.11:5000
+      - RML_APPLICATOR_HOST=http://172.130.0.10:8080
+      - DATASET_PREPROCESSOR_HOST=http://172.130.0.11:5000
     networks:
       setup:
-        ipv4_address: 172.30.0.2
+        ipv4_address: 172.130.0.2
   graphdb:
     image: ontotext/graphdb:10.2.0
     ports:
       - "7200:7200"
     networks:
       setup:
-        ipv4_address: 172.30.0.3
+        ipv4_address: 172.130.0.3
   db_expander:
     image: wseresearch/sparql-analyser-api:latest
     environment:
@@ -24,17 +24,17 @@ services:
       - sparql-analyse:/app/analysis
     networks:
       setup:
-        ipv4_address: 172.30.0.4
+        ipv4_address: 172.130.0.4
   rml_applicator:
     image: wseresearch/qado-rml-applicator:latest
     networks:
       setup:
-        ipv4_address: 172.30.0.10
+        ipv4_address: 172.130.0.10
   dataset_preprocessor:
     image: wseresearch/qado-dataset-preprocessor:latest
     networks:
       setup:
-        ipv4_address: 172.30.0.11
+        ipv4_address: 172.130.0.11
 volumes:
   sparql-analyse:
     external: true
@@ -42,5 +42,5 @@ networks:
   setup:
     ipam:
       config:
-        - subnet: 172.30.0.0/24
-          gateway: 172.30.0.1
+        - subnet: 172.130.0.0/24
+          gateway: 172.130.0.1
