@@ -10,9 +10,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-++++
-<img height="128" alt="QADO logo" src="https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f"/>
-++++
+image::https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f[]
 
 == QADO datasets
 
@@ -36,7 +34,7 @@ with statistics)
 * https://github.com/WSE-research/qado-sparql-validator[QADO SPARQL Query Validator] (validation of the results of the
 included SPARQL queries)
 
-Additionally, https://www.ontotext.com/products/graphdb/[GraphDB] instance is used temporarly for storing QADO data,
+Additionally, https://www.ontotext.com/products/graphdb/[GraphDB] instance is used temporarily for storing QADO data,
 accessible during build process at http://localhost:7200.
 
 [source,mermaid]
