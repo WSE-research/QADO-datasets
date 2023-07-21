@@ -10,7 +10,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-image::https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f[]
+image::https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f[QADO logo, 400]
 
 == QADO datasets
 
