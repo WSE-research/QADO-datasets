@@ -80,7 +80,7 @@ function createDb() {
   echo "Creating db qado..."
   curl --silent --output /dev/null -X POST -H "Content-Type: multipart/form-data" -F "config=@repo-config.ttl" http://172.130.0.3:7200/rest/repositories
 
-  insertDataIntoDb
+  insertDataIntoDb "$1"
 }
 
 
@@ -88,13 +88,16 @@ function insertDataIntoDb() {
   loadOntology
   fetchRmlData
   addAdditionalProperties
-  validateSPARQLQueries
+  validateSPARQLQueries "$1"
 }
 
 
 function validateSPARQLQueries() {
-  echo "Validate SPARQL queries..."
-  docker run --rm --network host wseresearch/qado-sparql-validator:latest "http://localhost:7200/repositories/qado" "http://localhost:7200/repositories/qado/statements"
+  if [ "$1" = "--validate" ]
+  then
+    echo "Validate SPARQL queries..."
+    docker run --rm --network host wseresearch/qado-sparql-validator:latest "http://localhost:7200/repositories/qado" "http://localhost:7200/repositories/qado/statements"
+  fi
 }
 
 
@@ -119,6 +122,6 @@ function removeTTL() {
 
 
 startDeployer
-createDb
+createDb "$1"
 exportDb
 stopDeployer

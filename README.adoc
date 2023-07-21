@@ -11,34 +11,43 @@ ifdef::env-github[]
 endif::[]
 
 ++++
-<img align="right" role="right" height="128" src="https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f"/>
+<img height="128" alt="QADO logo" src="https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f"/>
 ++++
 
-= QADO datasets
+== QADO datasets
 
-This repository contains a setup script for transforming link:./datasets[existing JSON datasets] following the QADO process of automatic RML-driven data transformation to an RDF representation.
-*The result of the process is stored as a https://github.com/WSE-research/QADO-deploy-prefilled-triplestore/releases[release] of this repository.*
+This repository contains a setup script for transforming link:./datasets[existing JSON datasets] following the QADO
+process of automatic RML-driven data transformation to an RDF representation. *The result of the process is stored as
+a https://github.com/WSE-research/QADO-deploy-prefilled-triplestore/releases[release] of this repository. It doesn't
+include the validation of the SPARQL queries.*
 
----
+'''
 
 toc::[]
 
-== Process 
+=== Process
 
 For the transformation process from JSON to RDF, the following services originating from the QADO initiative are used:
 
-* https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer[QADO Question Answering RDFizer] (basic JSON benchmark to RDF mapping)
-* https://github.com/WSE-research/SPARQLQueryAnalyser[QADO SPARQL Query Analyser] (extending SPARQL query objects with statistics)
+* https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer[QADO Question Answering RDFizer]
+(basic JSON benchmark to RDF mapping)
+* https://github.com/WSE-research/SPARQLQueryAnalyser[QADO SPARQL Query Analyser] (extending SPARQL query objects
+with statistics)
+* https://github.com/WSE-research/qado-sparql-validator[QADO SPARQL Query Validator] (validation of the results of the
+included SPARQL queries)
 
-Additionally, https://www.ontotext.com/products/graphdb/[GraphDB] instance is used temporarly for storing QADO data, accessible during build process at http://localhost:7200.
+Additionally, https://www.ontotext.com/products/graphdb/[GraphDB] instance is used temporarly for storing QADO data,
+accessible during build process at http://localhost:7200.
 
-```mermaid
+[source,mermaid]
+----
 sequenceDiagram
     participant Host
     participant RDFizer
     participant SPARQLQueryAnalyser
     participant SPARQLProcessor
-    
+    participant SPARQLQueryValidator
+
     Host ->> RDFizer: Convert JSON to RDF
     RDFizer -->> Host: Response with RDF triples
     Host ->> GraphDB: Store triples to DB
@@ -51,17 +60,22 @@ sequenceDiagram
     GraphDB -->> SPARQLProcessor: Upload finished
     SPARQLProcessor -->> SPARQLQueryAnalyser: Processing finished
     SPARQLQueryAnalyser --) Host: SPARQL query statistics generation finished
+    Host ->> SPARQLQueryValidator: Validating SPARQL queries
+    SPARQLQueryValidator ->> GraphDB: store validation timestamps
+    GraphDB -->> SPARQLQueryValidator: timestamps stored
+    SPARQLQueryValidator -->> Host: SPARQL query validation finished
     Host ->> GraphDB: Export full dataset
     GraphDB -->> Host: QADO dataset as RDF triples
-```
+----
 
-== Configurations of the datasets
+=== Configurations of the datasets
 
-Inside the link:./datasets[`datasets` directory] all tested benchmarks are provided.
-that can be integrated into the QADO dataset, . 
-If you want to add additional benchmarks, provided a valid https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer#api-endpoint[RDFizer payload] as a new JSON file.
+Inside the link:./datasets[`datasets` directory] all tested benchmarks are provided that can be integrated into the
+QADO dataset. If you want to add additional benchmarks, provided a valid
+https://github.com/WSE-research/QADO-question-answering-dataset-RDFizer#api-endpoint[RDFizer payload] as a new
+JSON file.
 
-== Run deployer
+=== Run deployer
 
 Step 1: Clone the repository 
 [source,shell]
@@ -72,12 +86,15 @@ git clone https://github.com/WSE-research/QADO-deploy-prefilled-triplestore.git
 Step 2: Run the deployment script
 [source,shell]
 ----
-bash deploy.sh 
+./deploy.sh --validate
 ----
 
-The script generates a ZIP file `qado-benchmark.zip` containing the full dataset (`full-qado.ttl`) and all supported benchmarks as separated files in a subdirectory named `datasets`.
+The script generates a ZIP file `qado-benchmark.zip` containing the full dataset (`full-qado.ttl`) and all supported
+benchmarks as separated files in a subdirectory named `datasets`. If you run the script with the parameter `--validate`
+you will validate the results of all included SPARQL queries. This behaviour is disabled per default to increase the
+build time.
 
-== Contributions
+=== Contributions
 
-Feel free to https://github.com/WSE-research/QADO-deploy-prefilled-triplestore/fork[contribute via a fork] and a pull request to this repository.
-You also might https://github.com/WSE-research/QADO-deploy-prefilled-triplestore/issues/new[create an issue].
+Feel free to https://github.com/WSE-research/QADO-deploy-prefilled-triplestore/fork[contribute via a fork] and a pull
+request to this repository. You also might https://github.com/WSE-research/QADO-deploy-prefilled-triplestore/issues/new[create an issue].
