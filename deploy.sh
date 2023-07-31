@@ -96,7 +96,7 @@ function validateSPARQLQueries() {
   if [ "$1" = "--validate" ]
   then
     echo "Validate SPARQL queries..."
-    docker run --rm --network host wseresearch/qado-sparql-validator:latest "http://localhost:7200/repositories/qado" "http://localhost:7200/repositories/qado/statements"
+    docker run --rm -it --network host wseresearch/qado-sparql-validator:latest "http://localhost:7200/repositories/qado" "http://localhost:7200/repositories/qado/statements"
   fi
 }
 
