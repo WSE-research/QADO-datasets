@@ -92,7 +92,7 @@ function insertDataIntoDb() {
 
 function stopDeployer() {
   echo "Stopping deployment tools..."
-  docker-compose logs graph_db
+  docker-compose logs graphdb
   docker-compose down
   docker container rm "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)" > /dev/null
   docker volume rm sparql-analyse > /dev/null
