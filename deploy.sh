@@ -1,10 +1,10 @@
 #!/bin/bash
 function initSparqlExpansion() {
   echo "Initialize setup..."
-  docker volume create sparql-analyse > /dev/null
-  docker pull wseresearch/sparql-analyser:latest > /dev/null
-  docker tag wseresearch/sparql-analyser:latest sparql-analyser:latest > /dev/null
-  docker image rm wseresearch/sparql-analyser:latest > /dev/null
+  docker volume create sparql-analyse
+  docker pull wseresearch/sparql-analyser:latest
+  docker tag wseresearch/sparql-analyser:latest sparql-analyser:latest
+  docker image rm wseresearch/sparql-analyser:latest
 }
 
 
@@ -94,7 +94,7 @@ function insertDataIntoDb() {
 function validateSPARQLQueries() {
   if [ "$1" = "--validate" ]
   then
-    docker pull wseresearch/qado-sparql-validator:latest > /dev/null
+    docker pull wseresearch/qado-sparql-validator:latest
     echo "Validate SPARQL queries..."
     docker run --rm -it --network host wseresearch/qado-sparql-validator:latest "http://localhost:7200/repositories/qado" "http://localhost:7200/repositories/qado/statements"
   fi
@@ -104,8 +104,8 @@ function validateSPARQLQueries() {
 function stopDeployer() {
   echo "Stopping deployment tools..."
   docker-compose down
-  docker container rm "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)" > /dev/null
-  docker volume rm sparql-analyse > /dev/null
+  docker container rm "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)"
+  docker volume rm sparql-analyse
 }
 
 
