@@ -48,16 +48,13 @@ function addAdditionalProperties() {
   echo "Generating additional properties..."
 
   payload=$(cat addSparqlAnalysis.json)
-  id=$(curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.30.0.4:80/sparql/analyse/db | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
-  sleep 1
-  initial=$(curl --silent "http://172.30.0.4:80/sparql/analyse/$id")
+  curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.30.0.4:80/sparql/analyse/db
 
   while true
   do
     sleep 5
-    current=$(curl --silent "http://172.30.0.4:80/sparql/analyse/$id")
 
-    if [ "$initial" != "$current" ]
+    if [ $( docker ps | grep sparql-analyser:latest | wc -l ) -eq 0 ]
     then
       break
     fi
