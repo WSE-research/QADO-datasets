@@ -74,7 +74,7 @@ function startDeployer() {
 
 function createDb() {
   echo "Creating db qado..."
-  curl --silent --output /dev/null -X POST -H "Content-Type: multipart/form-data" -F "config=@repo-config.ttl" http://172.30.0.3:7200/rest/repositories
+  curl --silent --output /dev/null -X POST -H "Content-Type: multipart/form-data" -F "config=@repo-config.ttl" http://172.130.0.3:7200/rest/repositories
 
   insertDataIntoDb
 }
