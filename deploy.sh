@@ -23,7 +23,7 @@ function checkAvailability() {
 
 function loadOntology() {
   echo "Fetching ontology..."
-  curl --silent --output ontology.ttl http://172.30.0.2:8080/ontology
+  curl --silent --output ontology.ttl http://172.130.0.2:8080/ontology
   addDataToDb "ontology.ttl"
 }
 
@@ -33,14 +33,14 @@ function fetchRmlData() {
   for payload in $(find datasets/ -iname "*.json")
   do
     data_file="${payload/".json"/".ttl"}"
-    curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$data_file" http://172.30.0.2:8080/json2rdf
+    curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$data_file" http://172.130.0.2:8080/json2rdf
     addDataToDb "$data_file"
   done
 }
 
 
 function addDataToDb() {
-   curl --silent -X POST -H "Content-Type: application/x-turtle" -T "$1" "http://172.30.0.3:7200/repositories/qado/statements"
+   curl --silent -X POST -H "Content-Type: application/x-turtle" -T "$1" "http://172.130.0.3:7200/repositories/qado/statements"
 }
 
 
@@ -48,7 +48,7 @@ function addAdditionalProperties() {
   echo "Generating additional properties..."
 
   payload=$(cat addSparqlAnalysis.json)
-  curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.30.0.4:80/sparql/analyse/db --output /dev/null
+  curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.130.0.4:80/sparql/analyse/db --output /dev/null
 
   while true
   do
