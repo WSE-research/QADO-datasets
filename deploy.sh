@@ -1,10 +1,10 @@
 #!/bin/bash
 function initSparqlExpansion() {
   echo "Initialize setup..."
-  docker volume create sparql-analyse
-  docker pull wseresearch/sparql-analyser:latest
-  docker tag wseresearch/sparql-analyser:latest sparql-analyser:latest
-  docker image rm wseresearch/sparql-analyser:latest
+  docker volume create sparql-analyse > /dev/null
+  docker pull wseresearch/sparql-analyser:latest > /dev/null
+  docker tag wseresearch/sparql-analyser:latest sparql-analyser:latest > /dev/null
+  docker image rm wseresearch/sparql-analyser:latest > /dev/null
 }
 
 
@@ -23,7 +23,7 @@ function checkAvailability() {
 
 function loadOntology() {
   echo "Fetching ontology..."
-  curl --silent --output ontology.ttl http://172.130.0.2:8080/ontology
+  curl --silent --output ontology.ttl http://172.30.0.2:8080/ontology
   addDataToDb "ontology.ttl"
 }
 
@@ -33,14 +33,14 @@ function fetchRmlData() {
   for payload in $(find datasets/ -iname "*.json")
   do
     data_file="${payload/".json"/".ttl"}"
-    curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$data_file" http://172.130.0.2:8080/json2rdf
+    curl -X POST -H "Content-Type: application/json" --silent --data-binary "@${payload}" --output "$data_file" http://172.30.0.2:8080/json2rdf
     addDataToDb "$data_file"
   done
 }
 
 
 function addDataToDb() {
-   curl --silent -X POST -H "Content-Type: application/x-turtle" -T "$1" "http://172.130.0.3:7200/repositories/qado/statements"
+   curl --silent -X POST -H "Content-Type: application/x-turtle" -T "$1" "http://172.30.0.3:7200/repositories/qado/statements"
 }
 
 
@@ -48,16 +48,13 @@ function addAdditionalProperties() {
   echo "Generating additional properties..."
 
   payload=$(cat addSparqlAnalysis.json)
-  id=$(curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.130.0.4:80/sparql/analyse/db | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
-  sleep 5
-  initial=$(curl --silent "http://172.130.0.4:80/sparql/analyse/$id")
+  curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.30.0.4:80/sparql/analyse/db --output /dev/null
 
   while true
   do
     sleep 5
-    current=$(curl --silent "http://172.130.0.4:80/sparql/analyse/$id")
 
-    if [ "$initial" != "$current" ]
+    if [ $( docker ps | grep sparql-analyser:latest | wc -l ) -eq 0 ]
     then
       break
     fi
@@ -77,9 +74,9 @@ function startDeployer() {
 
 function createDb() {
   echo "Creating db qado..."
-  curl --silent --output /dev/null -X POST -H "Content-Type: multipart/form-data" -F "config=@repo-config.ttl" http://172.130.0.3:7200/rest/repositories
+  curl --silent --output /dev/null -X POST -H "Content-Type: multipart/form-data" -F "config=@repo-config.ttl" http://172.30.0.3:7200/rest/repositories
 
-  insertDataIntoDb "$1"
+  insertDataIntoDb
 }
 
 
@@ -87,25 +84,14 @@ function insertDataIntoDb() {
   loadOntology
   fetchRmlData
   addAdditionalProperties
-  validateSPARQLQueries "$1"
-}
-
-
-function validateSPARQLQueries() {
-  if [ "$1" = "--validate" ]
-  then
-    docker pull wseresearch/qado-sparql-validator:latest
-    echo "Validate SPARQL queries..."
-    docker run --rm -it --network host wseresearch/qado-sparql-validator:latest "http://localhost:7200/repositories/qado" "http://localhost:7200/repositories/qado/statements"
-  fi
 }
 
 
 function stopDeployer() {
   echo "Stopping deployment tools..."
   docker-compose down
-  docker container rm "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)"
-  docker volume rm sparql-analyse
+  docker container rm "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)" > /dev/null
+  docker volume rm sparql-analyse > /dev/null
 }
 
 
@@ -122,6 +108,6 @@ function removeTTL() {
 
 
 startDeployer
-createDb "$1"
+createDb
 exportDb
 stopDeployer
