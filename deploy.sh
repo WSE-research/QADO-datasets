@@ -49,7 +49,7 @@ function addAdditionalProperties() {
 
   payload=$(cat addSparqlAnalysis.json)
   id=$(curl --silent -X POST -H "Content-Type: application/json" --data-raw "$payload" http://172.30.0.4:80/sparql/analyse/db | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
-  sleep 5
+  sleep 1
   initial=$(curl --silent "http://172.30.0.4:80/sparql/analyse/$id")
 
   while true
@@ -92,7 +92,7 @@ function insertDataIntoDb() {
 
 function stopDeployer() {
   echo "Stopping deployment tools..."
-  docker-compose logs graphdb
+  docker logs "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)"
   docker-compose down
   docker container rm "$(docker ps -a -q --filter ancestor=sparql-analyser:latest)" > /dev/null
   docker volume rm sparql-analyse > /dev/null
