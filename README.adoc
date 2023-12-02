@@ -10,7 +10,11 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-image::https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f[QADO logo, 400]
+++++
+<a href="https://github.com/search?q=topic%3Aqado+org%3AWSE-research&type=Repositories" title="see all QADO repositories">
+<img align="right" role="right" height="128" src="https://repository-images.githubusercontent.com/431670262/b11511f7-28c4-4d44-a884-9987128b535f"/>
+</a>
+++++
 
 == QADO datasets
 
@@ -75,16 +79,18 @@ JSON file.
 
 === Run deployer
 
-Step 1: Clone the repository 
+==== Step 1: Clone the repository 
+
 [source,shell]
 ----
 git clone https://github.com/WSE-research/QADO-deploy-prefilled-triplestore.git
 ----
 
-Step 2: Run the deployment script
+==== Step 2: Run the deployment script
+
 [source,shell]
 ----
-./deploy.sh --validate
+./deploy.sh 
 ----
 
 The script generates a ZIP file `qado-benchmark.zip` containing the full dataset (`full-qado.ttl`) and all supported
