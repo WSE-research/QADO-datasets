@@ -1,0 +1,22 @@
+:toc:
+:toclevels: 5
+:toc-placement!:
+:source-highlighter: highlight.js
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+# SPARQL Validator
+
+This Python script is evaluating all SPARQL queries stored in the QADO triplestore.
+All queries are fetched from the given QADO triplestore, execute on the recognized triplestores if they are available (i.e., DBpedia and Wikidata, not done for Freebase).
+To reflect the results the QADO triplestore is extended using the properties `qado:testedSuccessfullyAt` and `qado:didNotWorkAt`.
+
+
+## Configuration
+
+Define `QADO_ENDPOINT` with a URI that is pointing to the query endpoint of your triplestore (e.g., `http://172.130.0.3:7200/repositories/qado`).

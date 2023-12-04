@@ -1,3 +1,6 @@
 venv/
 *.bin
 .idea/
+sparql_validator/env/
+env/
+.vscode/

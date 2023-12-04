@@ -2,7 +2,12 @@
 
 # This script is used to deploy the QADO benchmark dataset
 
+# the script stops if an error occurs
+set -e
+
 sparqlanalyser="sparql-analyser:latest"
+
+validate="$1"
 
 function initSparqlExpansion() {
   echo "Initialize setup..."
@@ -39,6 +44,21 @@ function addDataToDb() {
   curl --silent -X POST -H "Content-Type: application/x-turtle" -T "$1" "http://172.130.0.3:7200/repositories/qado/statements"
 }
 
+function validate(){
+  if [ "$validate" != "--validate" ]
+  then
+    echo -n "No SPARQL query validation demanded. "
+  else
+    echo -n "SPARQL query validation: "
+    cd ./sparql_validator
+    python3 -m venv env
+    python3 -m pip install -r requirements.txt
+    export QADO_ENDPOINT="http://172.130.0.3:7200/repositories/qado"
+    python3 check_sparql_queries_in_qado_triplestore.py
+    echo -n "Done. "
+    cd ..
+  fi
+}
 
 function addAdditionalProperties() {
   echo "Generating additional properties from addSparqlAnalysis.json ..."
@@ -119,6 +139,14 @@ function exportDb() {
 }
 
 function createBasicStatistics(){
+
+  printf "\n=== Statistics: Number of triples in complete QADO dataset ===\n"
+  curl -X GET 'http://localhost:7200/repositories/qado?query=select%20(COUNT(*)%20AS%20%3Fcount)%20%20where%20%7B%20%0A%09%3Fs%20%3Fp%20%3Fo%20.%0A%7D%20%0A&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
+    --silent \
+    --header 'Accept: text/csv' \
+    --insecure | column -t -s,
+
+
   printf "\n=== Statistics: All dataset labels and number of their languages-specific questions ===\n"
   curl -X GET 'http://localhost:7200/repositories/qado?query=PREFIX+qado%3A+%3Chttp%3A%2F%2Fpurl.com%2Fqado%2Fontology.ttl%23%3E%0D%0APREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0ASELECT+%3Fdataset+%28count%28%3Fquestion%29+AS+%3Fnumber_of_questions%29%0D%0AWHERE+%7B+%0D%0A++++%3Fquestion+qado%3AisElementOf+%3Fdataset+.%0D%0A++++%3Fdataset+rdf%3Atype+qado%3ADataset+.%0D%0A%7D+%0D%0AGROUP+BY+%3Fdataset%0D%0A&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
     --silent \
@@ -141,6 +169,7 @@ function removeTTL() {
 
 startDeployer
 createDb
+validate
 exportDb
 createBasicStatistics
 stopDeployer
