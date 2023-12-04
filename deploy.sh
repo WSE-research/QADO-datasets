@@ -86,7 +86,7 @@ function checkAvailability() {
   do
     sleep 1
     echo -n "."
-    code=$(curl http://localhost:7200/rest/repositories -H "Accept: application/json" --write-out '%{http_code}' --silent --output /dev/null)
+    code=$(curl http://172.130.0.3:7200/rest/repositories -H "Accept: application/json" --write-out '%{http_code}' --silent --output /dev/null)
 
     if [ "$code" -eq 200 ]
     then
@@ -131,7 +131,7 @@ function stopDeployer() {
 
 function exportDb() {
   echo "Export DB..."
-  curl -H "Accept: application/x-turtle" --silent -o "full-qado.ttl" http://localhost:7200/repositories/qado/statements?infer=false
+  curl -H "Accept: application/x-turtle" --silent -o "full-qado.ttl" http://172.130.0.3:7200/repositories/qado/statements?infer=false
   zip qado-benchmarks.zip datasets/*.ttl ontology.ttl full-qado.ttl
   printf "\n### Create RDF Turtle files:\n"
   ls -1 datasets/*.ttl ontology.ttl full-qado.ttl
@@ -141,20 +141,20 @@ function exportDb() {
 function createBasicStatistics(){
 
   printf "\n=== Statistics: Number of triples in complete QADO dataset ===\n"
-  curl -X GET 'http://localhost:7200/repositories/qado?query=select%20(COUNT(*)%20AS%20%3Fcount)%20%20where%20%7B%20%0A%09%3Fs%20%3Fp%20%3Fo%20.%0A%7D%20%0A&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
+  curl -X GET 'http://172.130.0.3:7200/repositories/qado?query=select%20(COUNT(*)%20AS%20%3Fcount)%20%20where%20%7B%20%0A%09%3Fs%20%3Fp%20%3Fo%20.%0A%7D%20%0A&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
     --silent \
     --header 'Accept: text/csv' \
     --insecure | column -t -s,
 
 
   printf "\n=== Statistics: All dataset labels and number of their languages-specific questions ===\n"
-  curl -X GET 'http://localhost:7200/repositories/qado?query=PREFIX+qado%3A+%3Chttp%3A%2F%2Fpurl.com%2Fqado%2Fontology.ttl%23%3E%0D%0APREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0ASELECT+%3Fdataset+%28count%28%3Fquestion%29+AS+%3Fnumber_of_questions%29%0D%0AWHERE+%7B+%0D%0A++++%3Fquestion+qado%3AisElementOf+%3Fdataset+.%0D%0A++++%3Fdataset+rdf%3Atype+qado%3ADataset+.%0D%0A%7D+%0D%0AGROUP+BY+%3Fdataset%0D%0A&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
+  curl -X GET 'http://172.130.0.3:7200/repositories/qado?query=PREFIX+qado%3A+%3Chttp%3A%2F%2Fpurl.com%2Fqado%2Fontology.ttl%23%3E%0D%0APREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0ASELECT+%3Fdataset+%28count%28%3Fquestion%29+AS+%3Fnumber_of_questions%29%0D%0AWHERE+%7B+%0D%0A++++%3Fquestion+qado%3AisElementOf+%3Fdataset+.%0D%0A++++%3Fdataset+rdf%3Atype+qado%3ADataset+.%0D%0A%7D+%0D%0AGROUP+BY+%3Fdataset%0D%0A&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
     --silent \
     --header 'Accept: text/csv' \
     --insecure | column -t -s,
 
   printf "\n=== Statistics: Number of questions using a language in a dataset ===\n"
-  curl -X GET 'http://localhost:7200/repositories/qado?query=PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0APREFIX+qado%3A+%3Chttp%3A%2F%2Fpurl.com%2Fqado%2Fontology.ttl%23%3E%0D%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0ASELECT+%0D%0A++++%3Fdataset+%0D%0A++++%3Fdataset_label+%0D%0A++++%3Flang+%0D%0A++++%28COUNT%28%3Fquestion%29+AS+%3Fnumber_of_question_for_specific_language%29%0D%0AWHERE+%7B%0D%0A++++%3Fquestion+qado%3AisElementOf+%3Fdataset.%0D%0A++++%3Fdataset+rdf%3Atype+qado%3ADataset.%0D%0A++++%3Fdataset+rdfs%3Alabel+%3Fdataset_label+.%0D%0A++++%3Fquestion+qado%3AhasQuestion+%3Fquestion_string.%0D%0A++++BIND%28LANG%28%3Fquestion_string%29+AS+%3Flang%29%0D%0A%7D%0D%0AGROUP+BY+%3Fdataset+%3Fdataset_label+%3Flang%0D%0AORDER+BY+%3Fdataset_label&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
+  curl -X GET 'http://172.130.0.3:7200/repositories/qado?query=PREFIX+rdf%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%0D%0APREFIX+qado%3A+%3Chttp%3A%2F%2Fpurl.com%2Fqado%2Fontology.ttl%23%3E%0D%0APREFIX+rdfs%3A+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0D%0ASELECT+%0D%0A++++%3Fdataset+%0D%0A++++%3Fdataset_label+%0D%0A++++%3Flang+%0D%0A++++%28COUNT%28%3Fquestion%29+AS+%3Fnumber_of_question_for_specific_language%29%0D%0AWHERE+%7B%0D%0A++++%3Fquestion+qado%3AisElementOf+%3Fdataset.%0D%0A++++%3Fdataset+rdf%3Atype+qado%3ADataset.%0D%0A++++%3Fdataset+rdfs%3Alabel+%3Fdataset_label+.%0D%0A++++%3Fquestion+qado%3AhasQuestion+%3Fquestion_string.%0D%0A++++BIND%28LANG%28%3Fquestion_string%29+AS+%3Flang%29%0D%0A%7D%0D%0AGROUP+BY+%3Fdataset+%3Fdataset_label+%3Flang%0D%0AORDER+BY+%3Fdataset_label&infer=true&sameAs=true&Accept=text%2Fcsv&authToken=' \
     --silent \
     --header 'Accept: text/csv' \
     --insecure | column -t -s,
