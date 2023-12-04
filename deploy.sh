@@ -81,18 +81,19 @@ function addAdditionalProperties() {
 
 
 function checkAvailability() {
+  echo -n "Waiting until start up finished "
   while true
   do
-    echo "Waiting until start up finished."
     sleep 1
-    code=$(curl http://172.130.0.3:7200/rest/repositories -H "Accept: application/json" --write-out '%{http_code}' --silent --output /dev/null)
+    echo -n "."
+    code=$(curl http://localhost:7200/rest/repositories -H "Accept: application/json" --write-out '%{http_code}' --silent --output /dev/null)
 
     if [ "$code" -eq 200 ]
     then
       break
     fi
   done
-  echo "Start up completed."
+  echo " completed."
 }
 
 
