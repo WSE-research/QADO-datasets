@@ -99,7 +99,7 @@ function checkAvailability() {
 
 function startDeployer() {
   initSparqlExpansion
-  docker-compose pull
+  docker-compose pull --quiet
   docker-compose up -d
 
   checkAvailability
