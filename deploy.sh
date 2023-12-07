@@ -3,7 +3,7 @@
 # This script is used to deploy the QADO benchmark dataset
 
 # the script stops if an error occurs
-set -e
+# set -e
 
 sparqlanalyser="sparql-analyser:latest"
 
